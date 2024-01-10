@@ -1,0 +1,161 @@
+<style>
+  body {
+    background: #55a9ad;
+    color: #e1e1e1;
+    text-align: center;
+    font-size: 100px;
+  }
+  #kanji, #desc {
+    color: #212121
+  }
+  #kanji {
+    font-size: 150px;
+    padding-top: 100px;
+    cursor: pointer;
+  }
+  .hidden, input {
+    display: none;
+  }
+  label {
+    display: block;
+    width: 600px;
+    margin: 20px auto;
+    padding: 20px 50px;
+    background: #0e484b;
+    position: relative;
+    cursor: pointer;
+  }
+  input:checked + label:after {
+    content: "✓";
+    position: absolute;
+    right: 50px;
+    font-weight: bold;
+    color: #2dfd2d;
+  }
+</style>
+<div id="mode">
+  <input type="checkbox" id="all" onchange="selectAll(this)"><label for="all">Toàn bộ</label>
+</div>
+<div id="kanji"></div>
+<div id="desc"></div>
+<script>
+  let words = {
+    "Quốc gia": `
+      Ý, Italy, Italian
+      Bra-zin, Brazil, Brazilian
+      Nga, Russia, Russian
+      Mỹ, the USA, American
+      Đức, Germany, German
+      Ai Cập, Egypt, Egyptian
+      Úc, Australia, Australian
+      Mexico, Mexico, Mexican
+      Thổ Nhĩ Kỳ, Turkey, Turkish
+      Anh, the UK, British
+      Trung Quốc, China, Chinese
+      Tây Ban Nha, Spain, Spanish
+      Việt Nam, Vietnam, Vietnamese
+    `,
+    "Đồ vật": `
+      giỏ, bag
+      từ điển, dictionary
+      táo, apple
+      bút bi, pen
+      bút chì, pencil
+      sách, book
+      tập, notebook
+      máy nghe nhạc, iPod
+      điện thoại, mobile
+      dù, umbrella
+      em bé, baby
+      bé trai, boy
+      bé gái, girl
+      người đàn ông, man
+      người phụ nữ, woman
+      nhật ký, diary
+      ghế, chair
+      bàn, table
+      máy tính, computer
+      máy chụp hình, camera
+      đồng hồ đeo tay, watch
+      bánh kẹp, sandwich
+    `,
+    "Công việc": `
+      quản lý, manager
+      bác sĩ, doctor
+      diễn viên nam, actor
+      diễn viên nữ, actress
+      nhân viên bán hàng, shop assistant
+      giáo viên, teacher
+      bồi bàn nam, waiter
+      bồi bàn nữ, waitress
+      tài xế taxi, taxi driver
+      nhạc sĩ, musician
+      cảnh sát, police officer
+    `,
+    "Thông tin": `
+      tên, first name
+      họ, last name
+      có gia đình, married
+      độc thân, single
+      quốc tịch, nationality
+      địa chỉ, address
+      số điện thoại, mobile number
+      địa chỉ email, email address
+    `
+  };
+  const divKanji = document.getElementById("kanji");
+  const divDesc = document.getElementById("desc");
+  const mode = document.getElementById("mode");
+  let result = [];
+
+  let show = false;
+  let index = 0;
+
+  function generate() {
+    if (show) divDesc.classList.remove("hidden");
+    else {
+      let item = result[index].split(', ');
+      divKanji.innerHTML = item[0];
+      if (item[2]) item[1] += ` - ${item[2]}`;
+      divDesc.innerHTML = item[1];
+      divDesc.classList.add("hidden");
+      index++;
+      if (index == result.length) {
+        rnd();
+        alert("End of list, reshuffling...")
+        index = 0;
+      }
+    }
+    show = !show;
+  }
+
+  function rnd() {  
+    result = result.sort(() => Math.random() - 0.5);
+  }
+  
+  function selectAll(e) {
+    document.querySelectorAll("input").forEach(i => {
+      if (i.id != "all") i.checked = e.checked;
+    })
+  }
+  function next(a) {
+    document.querySelectorAll("input").forEach(i => {
+      if (i.id != "all" && (i.checked || a)) result.push(...words[i.id]);
+    })
+    mode.classList.add("hidden");
+    rnd();
+    generate();
+  }
+
+  for (word in words) {
+    mode.innerHTML += `<input type="checkbox" id="${word}"><label for="${word}">${word}</label>`
+    words[word] = words[word].split('\n').slice(1, -1);
+  }
+  mode.innerHTML += `<button onclick="next()">Tiếp tục</button>`
+
+  divKanji.onclick = () => {
+    generate();
+  }
+
+  next(true);
+</script>
