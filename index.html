@@ -223,7 +223,7 @@
   function speak(text) {
     if (speech.speaking) speech.cancel();
     tts.text = text || result[index - 1][1];
-    speech.speak(tts);
+    speech.speak(tts.replace(" - ", ", "));
   }
 
   for (word in words) {
