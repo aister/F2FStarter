@@ -177,13 +177,19 @@
   let e2v = false;
   let result = [];
   const speech = window.speechSynthesis;
-  let voices = [];
-  speech.onvoiceschanged = () => {
-    voices = speech.getVoices();
-    voices.forEach((i, index) => {
-      if (i.lang.startsWith("en")) document.getElementById("voiceList").innerHTML += `<option value="${index}">${i.name}</option>`
-    })
-  }
+  let getVoices = new Promise((res, rej) => {
+    let v = speech.getVoices();
+    if (v.length) res(v);
+    speech.onvoiceschanged = () => {
+      v = speech.getVoices();
+      res(v);
+    }
+    let voices = await getVoices();
+      voices.forEach((i, index) => {
+        document.getElementById("voiceList").innerHTML += `<option value="${index}">${i.name}</option>`
+      })
+    
+  });
 
   let show = false;
   let index = 0;
