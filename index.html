@@ -1,9 +1,12 @@
 <style>
   body {
-    background: #55a9ad;
+    background: #55a9ad; 
+  }
+  body, button {
     color: #e1e1e1;
     text-align: center;
-    font-size: 100px;
+    font-size: 40px;
+    font-family: arial;
   }
   #kanji, #desc {
     color: #212121
@@ -13,47 +16,110 @@
     padding-top: 100px;
     cursor: pointer;
   }
-  .hidden, input {
+  #desc {
+    opacity: 0;
+    font-size: 100px;
+  }
+  #desc.show {
+    opacity: 1;
+  }
+  .hidden {
     display: none;
   }
-  label {
+  #catContainer {
+    width: 800px;
+    margin: 0 auto;
+  }
+  .cat {
     display: block;
-    width: 600px;
-    margin: 20px auto;
-    padding: 20px 50px;
+    margin: 20px 0 0;
     background: #0e484b;
     position: relative;
-    cursor: pointer;
   }
-  input:checked + label:after {
-    content: "✓";
+  .cat .catTitle {
+    padding: 20px;
+  }
+  .cat input[type="checkbox"] {
     position: absolute;
-    right: 50px;
+    width: 45px;
+    height: 45px;
+    right: 20px;
+    top: 20px;
+  }
+  .modeBtn {
+    margin: 20px 10px;
+    width: calc(50% - 40px);
+    padding: 20px 0;
+    background: #034f17;
+    color: white;
+  }
+  .wordList {
+    background: #555555;
+    text-align: left;
+    padding: 20px;
+    color: white;
+  }
+  .wordList > div {
+    padding: 20px 0;
+  }
+  .wordList button {
+    margin-right: 20px;
+    background: transparent;
+    border: 0;
+  }
+  .wordList span {
+    color: #94e7eb;
     font-weight: bold;
-    color: #2dfd2d;
+    padding-right: 50px;
+  }
+  #next {
+    font-size: 100px;
+    width: 600px;
+    padding: 20px 0;
+    border: 0;
+    margin-top: 50px;
+    background: #034f17;
+    color: white;
+  }
+  #voiceList, input[type="text"] {
+    font-size: 30px;
+    width: 100%;
+  }
+  #voiceList {
+    margin-bottom: 20px;
   }
 </style>
-<div id="mode">
-  <input type="checkbox" id="all" onchange="selectAll(this)"><label for="all">Toàn bộ</label>
+<div id="catContainer">
+  <div class="cat">
+    <div class="catTitle">Tùy chỉnh</div>
+    <div class="wordList">
+      <select id="voiceList" onchange="change(this)"></select>
+      <input type="text" onchange="change(this)" value="0.4">
+    </div>
+  </div>
+  <div id="catList"></div>
 </div>
-<div id="kanji"></div>
-<div id="desc"></div>
+<div id="main" class="hidden">
+  <div id="kanji"></div>
+  <div id="desc"></div>
+  <button onclick="generate()" class="modeBtn">Tiếp theo</button>
+</div>
 <script>
   let words = {
     "Quốc gia": `
-      Ý, Italy, Italian
-      Bra-zin, Brazil, Brazilian
-      Nga, Russia, Russian
-      Mỹ, the USA, American
-      Đức, Germany, German
-      Ai Cập, Egypt, Egyptian
-      Úc, Australia, Australian
-      Mexico, Mexico, Mexican
-      Thổ Nhĩ Kỳ, Turkey, Turkish
-      Anh, the UK, British
-      Trung Quốc, China, Chinese
-      Tây Ban Nha, Spain, Spanish
-      Việt Nam, Vietnam, Vietnamese
+      Ý, Italy - Italian
+      Bra-zin, Brazil - Brazilian
+      Nga, Russia - Russian
+      Mỹ, the USA - American
+      Đức, Germany - German
+      Ai Cập, Egypt - Egyptian
+      Úc, Australia - Australian
+      Mexico, Mexico - Mexican
+      Thổ Nhĩ Kỳ, Turkey - Turkish
+      Anh, the UK - British
+      Trung Quốc, China - Chinese
+      Tây Ban Nha, Spain - Spanish
+      Việt Nam, Vietnam - Vietnamese
     `,
     "Đồ vật": `
       giỏ, bag
@@ -94,7 +160,7 @@
     `,
     "Thông tin": `
       tên, first name
-      họ, last name
+      họ, surname
       có gia đình, married
       độc thân, single
       quốc tịch, nationality
@@ -105,26 +171,43 @@
   };
   const divKanji = document.getElementById("kanji");
   const divDesc = document.getElementById("desc");
-  const mode = document.getElementById("mode");
+  const cat = document.getElementById("catList");
+  const tts = new SpeechSynthesisUtterance();
+  tts.rate = 0.4;
+  let e2v = false;
   let result = [];
+  const speech = window.speechSynthesis;
+  let voices = [];
+  speech.onvoiceschanged = () => {
+    voices = speech.getVoices();
+    voices.forEach((i, index) => {
+      if (i.lang.startsWith("en")) document.getElementById("voiceList").innerHTML += `<option value="${index}">${i.name}</option>`
+    })
+  }
 
   let show = false;
   let index = 0;
 
   function generate() {
-    if (show) divDesc.classList.remove("hidden");
+    if (show) {
+      divDesc.classList.add("show");
+      speak();
+    }
     else {
-      let item = result[index].split(', ');
-      divKanji.innerHTML = item[0];
-      if (item[2]) item[1] += ` - ${item[2]}`;
-      divDesc.innerHTML = item[1];
-      divDesc.classList.add("hidden");
-      index++;
       if (index == result.length) {
         rnd();
-        alert("End of list, reshuffling...")
         index = 0;
+        alert("Đã hết danh sách từ vựng, danh sách sẽ tráo lại từ đầu...")
       }
+      if (e2v) {
+        divKanji.innerHTML = result[index][1];
+        divDesc.innerHTML = result[index][0];
+      } else {
+        divKanji.innerHTML = result[index][0];
+        divDesc.innerHTML = result[index][1];
+      }
+      divDesc.classList.remove("show");
+      index++;
     }
     show = !show;
   }
@@ -132,30 +215,42 @@
   function rnd() {  
     result = result.sort(() => Math.random() - 0.5);
   }
-  
-  function selectAll(e) {
+  function next(m) {
+    result = [];
     document.querySelectorAll("input").forEach(i => {
-      if (i.id != "all") i.checked = e.checked;
-    })
-  }
-  function next(a) {
-    document.querySelectorAll("input").forEach(i => {
-      if (i.id != "all" && (i.checked || a)) result.push(...words[i.id]);
-    })
-    mode.classList.add("hidden");
+      if (i.checked) result.push(...words[i.id]);
+    });
+    if (!result.length) return alert("Xin hãy chọn ít nhất một chủ đề");
+    document.getElementById("catContainer").classList.add("hidden");
+    document.getElementById("main").classList.remove("hidden");
+    e2v = m;
     rnd();
     generate();
   }
 
+  function showDiv(e) {
+    e.nextSibling.classList.toggle("hidden");
+  }
+
+  function speak(text) {
+    if (speech.speaking) speech.cancel();
+    tts.text = text || result[index - 1][1];
+    speech.speak(tts);
+  }
+
+  function change(e) {
+    if (e.tagName == "SELECT") tts.voice = voices[e.value];
+    else tts.rate = e.value;
+  }
+
   for (word in words) {
-    mode.innerHTML += `<input type="checkbox" id="${word}"><label for="${word}">${word}</label>`
-    words[word] = words[word].split('\n').slice(1, -1);
+    let wordList = "";
+    words[word] = words[word].split('\n').slice(1, -1).map(i => {
+      i = i.split(", ");
+      wordList += `<div><button onclick="speak('${i[1]}')">🔊</button><span>${i[0]}</span>${i[1]}</div>`
+      return i;
+    });
+    cat.innerHTML += `<div class="cat"><input type="checkbox" id="${word}"><div class="catTitle" onclick="showDiv(this)">${word}</div><div class="wordList hidden">${wordList}</div></div>`;
   }
-  mode.innerHTML += `<button onclick="next()">Tiếp tục</button>`
-
-  divKanji.onclick = () => {
-    generate();
-  }
-
-  next(true);
+  cat.innerHTML += `<button class="modeBtn" onclick="next(false)">Việt ⇒ Anh</button><button class="modeBtn" onclick="next(true)">Anh ⇒ Việt</button>`
 </script>
