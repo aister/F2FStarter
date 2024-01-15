@@ -90,13 +90,6 @@
   }
 </style>
 <div id="catContainer">
-  <div class="cat">
-    <div class="catTitle">Tùy chỉnh</div>
-    <div class="wordList">
-      <select id="voiceList" onchange="change(this)"></select>
-      <input type="text" onchange="change(this)" value="0.4">
-    </div>
-  </div>
   <div id="catList"></div>
 </div>
 <div id="main" class="hidden">
@@ -173,16 +166,12 @@
   const divDesc = document.getElementById("desc");
   const cat = document.getElementById("catList");
   const tts = new SpeechSynthesisUtterance();
-  tts.rate = 0.4;
+  tts.rate = 0.6;
   let e2v = false;
   let result = [];
   const speech = window.speechSynthesis;
   let voices = speech.getVoices();
-    
-  voices.forEach((i, index) => {
-    document.getElementById("voiceList").innerHTML += `<option value="${index}">${i.name}</option>`
-  })
-    
+  if (voices.length) tts.voice = voices.find(i => i.name == "Daniel")
 
   let show = false;
   let index = 0;
@@ -235,11 +224,6 @@
     if (speech.speaking) speech.cancel();
     tts.text = text || result[index - 1][1];
     speech.speak(tts);
-  }
-
-  function change(e) {
-    if (e.tagName == "SELECT") tts.voice = voices[e.value];
-    else tts.rate = e.value;
   }
 
   for (word in words) {
