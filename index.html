@@ -74,19 +74,18 @@
   }
   #next {
     font-size: 100px;
-    width: 600px;
+    width: 500px;
     padding: 20px 0;
     border: 0;
     margin-top: 50px;
     background: #034f17;
     color: white;
   }
-  #voiceList, input[type="text"] {
-    font-size: 30px;
-    width: 100%;
-  }
-  #voiceList {
-    margin-bottom: 20px;
+  .speak {
+    width: 80px;
+    padding: 20px 0;
+    border: 0;
+    margin-left: 20px;
   }
 </style>
 <div id="catContainer">
@@ -96,6 +95,7 @@
   <div id="kanji"></div>
   <div id="desc"></div>
   <button onclick="generate()" class="modeBtn">Tiếp theo</button>
+  <button class="speak" onclick="speak()">🔊</button>
 </div>
 <script>
   let words = {
@@ -160,21 +160,55 @@
       địa chỉ, address
       số điện thoại, mobile number
       địa chỉ email, email address
+    `,
+    "Chữ số": `
+      0, zero
+      1, one
+      2, two
+      3, three
+      4, four
+      5, five
+      6, six
+      7, seven
+      8, eight
+      9, nine
+      10, ten
+      11, eleven
+      12, twelve
+      13, thirteen
+      14, fourteen
+      15, fifteen
+      16, sixteen
+      17, seventeen
+      18, eighteen
+      19, nineteen
+      20, twenty
+      30, thirty
+      40, forty
+      50, fifty
+      60, sixty
+      70, seventy
+      80, eighty
+      90, ninety
+      100, one hundred
     `
   };
   const divKanji = document.getElementById("kanji");
   const divDesc = document.getElementById("desc");
   const cat = document.getElementById("catList");
-  const tts = new SpeechSynthesisUtterance();
-  tts.rate = 0.6;
-  let e2v = false;
-  let result = [];
+  
   const speech = window.speechSynthesis;
-  let voices = speech.getVoices();
-  if (voices.length) tts.voice = voices.find(i => i.name == "Daniel")
+  if (speech) {
+    const tts = new SpeechSynthesisUtterance();
+    tts.rate = 0.6;
+    let voices = speech.getVoices();
+    if (voices.length) tts.voice = voices.find(i => i.name == "Daniel");
+  } else alert("Tính năng đọc không hoạt động, vui lòng mở trang web bằng Google Chrome")
 
   let show = false;
   let index = 0;
+  let e2v = false;
+  let result = [];
 
   function generate() {
     if (show) {
@@ -221,6 +255,7 @@
   }
 
   function speak(text) {
+    if (!speech) return;
     if (speech.speaking) speech.cancel();
     text = text || result[index - 1][1];
     tts.text = text.replace(" - ", ", ");
