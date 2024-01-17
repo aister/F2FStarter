@@ -198,8 +198,9 @@
   const cat = document.getElementById("catList");
   
   const speech = window.speechSynthesis;
+  let tts;
   if (speech) {
-    const tts = new SpeechSynthesisUtterance();
+    tts = new SpeechSynthesisUtterance();
     tts.rate = 0.6;
     let voices = speech.getVoices();
     if (voices.length) tts.voice = voices.find(i => i.name == "Daniel");
