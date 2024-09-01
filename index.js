@@ -1,4 +1,5 @@
-
+const mode1 = "Việt ⇒ Anh";
+const mode2 = "Anh ⇒ Việt";
   let words = {
     "Quốc gia": `
       Ý, Italy - Italian
