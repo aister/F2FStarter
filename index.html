@@ -99,7 +99,7 @@
 </div>
 <script>
   let src = "./index.js";
-  if (location.search) src = `./${location.search.match(/id=[^&]+/)[0].slice(3)}.js`;
+  if (location.search && location.search.match(/id=[^&]+/)) src = `./${location.search.match(/id=[^&]+/)[0].slice(3)}.js`;
   let script = document.createElement("script");
   script.src = src;
   script.onload = () => {
