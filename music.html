@@ -152,7 +152,7 @@
   function displayNote(cur, main) {
     let distance = 20;
     if (main === false) distance = 12;
-    let noteDiv = `<div class="noteDiv"><img class="note" style="bottom: ${distance + cur.pos * distance}px" src="/img/note.png"><img class="note" style="bottom: ${distance + (cur.pos + 7) * distance}px" src="/img/note.png">`
+    let noteDiv = `<div class="noteDiv"><img class="note" style="bottom: ${distance + cur.pos * distance}px" src="./img/note.png"><img class="note" style="bottom: ${distance + (cur.pos + 7) * distance}px" src="./img/note.png">`
 
     if (cur.pos == 0) noteDiv += `<hr class="bottomLine">`
     else if (cur.pos >= 5) noteDiv += `<hr class="topLine">`
@@ -164,7 +164,7 @@
       size = 24;
     }
     noteDiv += `</div>`;
-    let pianoDiv = `<div class="pianoDiv"><img class="note" style="width: ${size}; bottom: ${size / 2}px; left: ${(cur.pos + 1) * distance - size / 2}px" src="/img/note.png"></div>`;
+    let pianoDiv = `<div class="pianoDiv"><img class="note" style="width: ${size}; bottom: ${size / 2}px; left: ${(cur.pos + 1) * distance - size / 2}px" src="./img/note.png"></div>`;
 
     cur = [ `<div>${cur.name}</div>`, `<div>${cur.key}</div>`, noteDiv, pianoDiv ];
     if (main === false) return cur;
