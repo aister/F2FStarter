@@ -1,0 +1,195 @@
+<style>
+  body {
+    background: #55a9ad; 
+  }
+  body, button {
+    color: #e1e1e1;
+    text-align: center;
+    font-size: 40px;
+    font-family: arial;
+  }
+  .noteDiv, .pianoDiv {
+    position: relative;
+    margin: 0 auto;
+    background: url("./img/noteLine.png");
+    background-size: contain;
+    width: 240px;
+    height: 192px;
+  }
+  .pianoDiv {
+    width: 320px;
+    height: 160px;
+    background: url("./img/piano.png");
+    background-size: contain;
+  }
+  #main .noteDiv, #main .pianoDiv {
+    width: 400px;
+    height: 320px;
+  }
+  #main .pianoDiv {
+    height: 200px;
+  }
+  #catContainer .noteDiv, #catContainer .pianoDiv {
+    display: inline-block;
+    margin: 0 20px;
+  }
+  hr {
+    position: absolute;
+    margin: 0;
+    border-style: solid;
+  }
+  .note {
+    position: absolute;
+    z-index: 1;
+    width: 20px;
+    left: 70px;
+  }
+  #catContainer .noteDiv .note {
+    width: 30px;
+    left: 105px;
+  }
+  #main .note {
+    width: 50px;
+    left: 175px;
+  }
+  .bottomLine, .topLine {
+    width: 60px;
+    top: 168px;
+    left: 90px;
+  }
+  .topLine {
+    top: 24px;
+  }
+  #catContainer hr {
+    border-width: 0 0 1px 0;
+  }
+  #main .bottomLine, #main .topLine {
+    width: 100px;
+    top: 280px;
+    left: 150px;
+  }
+  #main .topLine {
+    top: 40px;
+  }
+  #kanji, #desc {
+    color: #212121
+  }
+  #kanji {
+    font-size: 150px;
+    padding-top: 100px;
+    cursor: pointer;
+  }
+  #desc {
+    font-size: 100px;
+  }
+  .hidden {
+    display: none;
+  }
+  .modeBtn {
+    margin: 20px 10px;
+    width: calc(50% - 40px);
+    padding: 20px 0;
+    background: #034f17;
+    color: white;
+  }
+  #catContainer {
+    color: black;
+  }
+  .noteItem {
+    margin: 100px 0;
+  }
+  .noteTitle {
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+</style>
+<div id="catContainer">
+  <div id="catList"></div>
+  Hiển thị
+  <div id="modeSelector">
+    <button class="modeBtn" onclick="modeSelect(0)">Ký hiệu</button>
+    <button class="modeBtn" onclick="modeSelect(1)">Tên nốt</button>
+    <button class="modeBtn" onclick="modeSelect(2)">Bản nhạc</button>
+    <button class="modeBtn" onclick="modeSelect(4)">Vị trí</button>
+  </div>
+</div>
+<div id="main" class="hidden">
+  <div id="kanji"></div>
+  <div id="desc" class="hidden"></div>
+  <button onclick="generate()" class="modeBtn">Tiếp theo</button>
+</div>
+<script>
+  const content = {
+    "Nốt nhạc": [
+      { name: "Do", key: "C", pos: 0 },
+      { name: "Re", key: "D", pos: 1 },
+      { name: "Mi", key: "E", pos: 2 },
+      { name: "Fa", key: "F", pos: 3 },
+      { name: "Sol", key: "G", pos: 4 },
+      { name: "La", key: "A", pos: 5 },
+      { name: "Si", key: "B", pos: 6 }
+    ]
+  }
+
+  const mainDiv = document.getElementById("kanji");
+  const descDiv = document.getElementById("desc");
+  const catList = document.getElementById("catList");
+
+  content["Nốt nhạc"].forEach(i => {
+    i = displayNote(i, false);
+    catList.innerHTML += `<div class="noteItem"><div class="noteTitle">${i[0].slice(0, -6)} - Ký hiệu:  ${i[1].slice(5)}</div>${i[2]  + i[3]}</div>`;
+  })
+
+  let randomized = content["Nốt nhạc"].sort(() => Math.random() - 0.5);
+  let mode = 0;
+  function modeSelect(m) {
+    mode = m;
+    displayNote(randomized[0], m);
+    document.getElementById("catContainer").classList.add("hidden");
+    document.getElementById("main").classList.remove("hidden");
+  }
+
+  function displayNote(cur, main) {
+    let distance = 20;
+    if (main === false) distance = 12;
+    let noteDiv = `<div class="noteDiv"><img class="note" style="bottom: ${distance + cur.pos * distance}px" src="/img/note.png"><img class="note" style="bottom: ${distance + (cur.pos + 7) * distance}px" src="/img/note.png">`
+
+    if (cur.pos == 0) noteDiv += `<hr class="bottomLine">`
+    else if (cur.pos >= 5) noteDiv += `<hr class="topLine">`
+
+    distance = 50;
+    let size = 30;
+    if (main === false) {
+      distance = 40;
+      size = 24;
+    }
+    noteDiv += `</div>`;
+    let pianoDiv = `<div class="pianoDiv"><img class="note" style="width: ${size}; bottom: ${size / 2}px; left: ${(cur.pos + 1) * distance - size / 2}px" src="/img/note.png"></div>`;
+
+    cur = [ `<div>${cur.name}</div>`, `<div>${cur.key}</div>`, noteDiv, pianoDiv ];
+    if (main === false) return cur;
+    mainDiv.innerHTML = cur.splice(main, 1);
+    descDiv.innerHTML = cur.join("");
+    descDiv.classList.add("hidden");
+  }
+
+  let rIndex = 0;
+  let step = 0;
+
+  //displayNote(randomized[0], mode);
+  function generate() {
+    if (step) {
+      step = 0;
+      rIndex++;
+      if (rIndex == randomized.length) {
+        alert("Đã hết danh sách, danh sách sẽ xáo trộn lại từ đầu");
+        rIndex = 0;
+        randomized = content["Nốt nhạc"].sort(() => Math.random() - 0.5);
+      }
+      displayNote(randomized[rIndex], mode);
+    } else {
+      descDiv.classList.remove("hidden");
+      step = 1;
+    }
+  }
+</script>
