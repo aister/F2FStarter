@@ -85,6 +85,9 @@
   .hidden {
     display: none;
   }
+  .step div:nth-child(1), .step .note, .step hr {
+    opacity: 0;
+  }
   .modeBtn {
     margin: 20px 10px;
     width: calc(50% - 40px);
@@ -115,7 +118,7 @@
 </div>
 <div id="main" class="hidden">
   <div id="kanji"></div>
-  <div id="desc" class="hidden"></div>
+  <div id="desc" class="step"></div>
   <button onclick="generate()" class="modeBtn">Tiếp theo</button>
 </div>
 <script>
@@ -170,7 +173,7 @@
     if (main === false) return cur;
     mainDiv.innerHTML = cur.splice(main, 1);
     descDiv.innerHTML = cur.join("");
-    descDiv.classList.add("hidden");
+    descDiv.classList.add("step");
   }
 
   let rIndex = 0;
@@ -188,7 +191,7 @@
       }
       displayNote(randomized[rIndex], mode);
     } else {
-      descDiv.classList.remove("hidden");
+      descDiv.classList.remove("step");
       step = 1;
     }
   }
