@@ -8,191 +8,176 @@
     font-size: 40px;
     font-family: arial;
   }
-  .noteDiv, .pianoDiv {
-    position: relative;
-    margin: 0 auto;
-    background: url("./img/noteLine.png");
-    background-size: contain;
-    width: 240px;
-    height: 192px;
-  }
-  .pianoDiv {
-    width: 320px;
-    height: 160px;
-    background: url("./img/piano.png");
-    background-size: contain;
-  }
-  #main .noteDiv, #main .pianoDiv {
-    width: 400px;
-    height: 320px;
-  }
-  #main .pianoDiv {
-    height: 200px;
-  }
-  #catContainer .noteDiv, #catContainer .pianoDiv {
-    display: inline-block;
-    margin: 0 20px;
-  }
-  hr {
-    position: absolute;
-    margin: 0;
-    border-style: solid;
-  }
-  .note {
-    position: absolute;
-    z-index: 1;
-    width: 20px;
-    left: 70px;
-  }
-  #catContainer .noteDiv .note {
-    width: 30px;
-    left: 105px;
-  }
-  #main .note {
-    width: 50px;
-    left: 175px;
-  }
-  .bottomLine, .topLine {
-    width: 60px;
-    top: 168px;
-    left: 90px;
-  }
-  .topLine {
-    top: 24px;
-  }
-  #catContainer hr {
-    border-width: 0 0 1px 0;
-  }
-  #main .bottomLine, #main .topLine {
-    width: 100px;
-    top: 280px;
-    left: 150px;
-  }
-  #main .topLine {
-    top: 40px;
-  }
   #kanji, #desc {
     color: #212121
   }
-  #kanji {
-    font-size: 150px;
-    padding-top: 100px;
-    cursor: pointer;
+  cursor: pointer;
   }
   #desc {
+    opacity: 0;
     font-size: 100px;
+  }
+  #desc.show {
+    opacity: 1;
   }
   .hidden {
     display: none;
   }
-  .step .text, .step .note, .step hr {
-    opacity: 0;
+  #catContainer {
+    width: 800px;
+    margin: 0 auto;
+  }
+  .cat {
+    display: block;
+    margin: 20px 0 0;
+    background: #0e484b;
+    position: relative;
+  }
+  .cat .catTitle {
+    padding: 20px;
+  }
+  .cat input[type="checkbox"] {
+    position: absolute;
+    width: 45px;
+    height: 45px;
+    right: 20px;
+    top: 20px;
   }
   .modeBtn {
     margin: 20px 10px;
-    width: calc(50% - 40px);
-    padding: 20px 0;
     background: #034f17;
     color: white;
   }
-  #catContainer {
-    color: black;
+  .wordList {
+    background: #555555;
+    text-align: left;
+    padding: 20px;
+    color: white;
   }
-  .noteItem {
-    margin: 100px 0;
+  .wordList > div {
+    padding: 20px 0;
   }
-  .noteTitle {
+  .wordList button {
+    margin-right: 20px;
+    background: transparent;
+    border: 0;
+  }
+  .wordList span {
+    color: #94e7eb;
     font-weight: bold;
-    margin-bottom: 20px;
+    padding-right: 50px;
+  }
+  #next {
+    font-size: 100px;
+    width: 500px;
+    padding: 20px 0;
+    border: 0;
+    margin-top: 50px;
+    background: #034f17;
+    color: white;
+  }
+  .speak {
+    width: 80px;
+    padding: 20px 0;
+    border: 0;
+    margin-left: 20px;
   }
 </style>
 <div id="catContainer">
   <div id="catList"></div>
-  Hiển thị
-  <div id="modeSelector">
-    <button class="modeBtn" onclick="modeSelect(0)">Tên nốt</button>
-    <button class="modeBtn" onclick="modeSelect(1)">Ký hiệu</button>
-    <button class="modeBtn" onclick="modeSelect(2)">Bản nhạc</button>
-    <button class="modeBtn" onclick="modeSelect(3)">Vị trí</button>
-  </div>
 </div>
 <div id="main" class="hidden">
   <div id="kanji"></div>
-  <div id="desc" class="step"></div>
+  <div id="desc"></div>
   <button onclick="generate()" class="modeBtn">Tiếp theo</button>
+  <button class="speak" onclick="speak()">🔊</button>
 </div>
 <script>
-  const content = {
-    "Nốt nhạc": [
-      { name: "Do", key: "C", pos: 0 },
-      { name: "Re", key: "D", pos: 1 },
-      { name: "Mi", key: "E", pos: 2 },
-      { name: "Fa", key: "F", pos: 3 },
-      { name: "Sol", key: "G", pos: 4 },
-      { name: "La", key: "A", pos: 5 },
-      { name: "Si", key: "B", pos: 6 }
-    ]
+  let src = "./index.js";
+  if (location.search && location.search.match(/id=[^&]+/)) src = `./${location.search.match(/id=[^&]+/)[0].slice(3)}.js`;
+  let script = document.createElement("script");
+  script.src = src;
+  script.onload = () => {
+    for (word in words) {
+      let wordList = "";
+      words[word] = words[word].split('\n').slice(1, -1).map(i => {
+        i = i.split(", ");
+        wordList += `<div><button onclick="speak('${i[1]}')">🔊</button><span>${i[0]}</span>${i[1]}</div>`
+        return i;
+      });
+      cat.innerHTML += `<div class="cat"><input type="checkbox" id="${word}"><div class="catTitle" onclick="showDiv(this)">${word}</div><div class="wordList hidden">${wordList}</div></div>`;
+    }
+    cat.innerHTML += `<button class="modeBtn" onclick="next(false)">${mode1}</button><button class="modeBtn" onclick="next(true)">${mode2}</button>`
+  }
+  document.body.appendChild(script);
+    
+  const divKanji = document.getElementById("kanji");
+  const divDesc = document.getElementById("desc");
+  const cat = document.getElementById("catList");
+  
+  const speech = window.speechSynthesis;
+  let tts;
+  if (speech) {
+    tts = new SpeechSynthesisUtterance();
+    tts.rate = 0.6;
+    let voices = speech.getVoices();
+    if (voices.length) tts.voice = voices.find(i => i.name == "Daniel");
+  } else alert("Tính năng đọc không hoạt động, vui lòng mở trang web bằng Google Chrome")
+
+  let show = false;
+  let index = 0;
+  let e2v = false;
+  let result = [];
+
+  function generate() {
+    if (show) {
+      divDesc.classList.add("show");
+      speak();
+    }
+    else {
+      if (index == result.length) {
+        rnd();
+        index = 0;
+        alert("Đã hết danh sách từ vựng, danh sách sẽ tráo lại từ đầu...")
+      }
+      if (e2v) {
+        divKanji.innerHTML = result[index][1];
+        divDesc.innerHTML = result[index][0];
+      } else {
+        divKanji.innerHTML = result[index][0];
+        divDesc.innerHTML = result[index][1];
+      }
+      divDesc.classList.remove("show");
+      index++;
+    }
+    show = !show;
   }
 
-  const mainDiv = document.getElementById("kanji");
-  const descDiv = document.getElementById("desc");
-  const catList = document.getElementById("catList");
-
-  content["Nốt nhạc"].forEach(i => {
-    i = displayNote(i, false);
-    catList.innerHTML += `<div class="noteItem"><div class="noteTitle">${i[0].slice(0, -6)} - Ký hiệu:  ${i[1].slice(18)}</div>${i[2]  + i[3]}</div>`;
-  })
-
-  let randomized = content["Nốt nhạc"].sort(() => Math.random() - 0.5);
-  let mode = 0;
-  function modeSelect(m) {
-    mode = m;
-    displayNote(randomized[0], m);
+  function rnd() {  
+    result = result.sort(() => Math.random() - 0.5);
+  }
+  function next(m) {
+    result = [];
+    document.querySelectorAll("input").forEach(i => {
+      if (i.checked) result.push(...words[i.id]);
+    });
+    if (!result.length) return alert("Xin hãy chọn ít nhất một chủ đề");
     document.getElementById("catContainer").classList.add("hidden");
     document.getElementById("main").classList.remove("hidden");
+    e2v = m;
+    rnd();
+    generate();
   }
 
-  function displayNote(cur, main) {
-    let distance = 20;
-    if (main === false) distance = 12;
-    let noteDiv = `<div class="noteDiv"><img class="note" style="bottom: ${distance + cur.pos * distance}px" src="./img/note.png"><img class="note" style="bottom: ${distance + (cur.pos + 7) * distance}px" src="./img/note.png">`
-
-    if (cur.pos == 0) noteDiv += `<hr class="bottomLine">`
-    else if (cur.pos >= 5) noteDiv += `<hr class="topLine">`
-
-    distance = 50;
-    let size = 30;
-    if (main === false) {
-      distance = 40;
-      size = 24;
-    }
-    noteDiv += `</div>`;
-    let pianoDiv = `<div class="pianoDiv"><img class="note" style="width: ${size}; bottom: ${size / 2}px; left: ${(cur.pos + 1) * distance - size / 2}px" src="./img/note.png"></div>`;
-
-    cur = [ `<div class="text">${cur.name}</div>`, `<div class="text">${cur.key}</div>`, noteDiv, pianoDiv ];
-    if (main === false) return cur;
-    mainDiv.innerHTML = cur.splice(main, 1);
-    descDiv.innerHTML = cur.join("");
-    descDiv.classList.add("step");
+  function showDiv(e) {
+    e.nextSibling.classList.toggle("hidden");
   }
 
-  let rIndex = 0;
-  let step = 0;
-
-  //displayNote(randomized[0], mode);
-  function generate() {
-    if (step) {
-      step = 0;
-      rIndex++;
-      if (rIndex == randomized.length) {
-        alert("Đã hết danh sách, danh sách sẽ xáo trộn lại từ đầu");
-        rIndex = 0;
-        randomized = content["Nốt nhạc"].sort(() => Math.random() - 0.5);
-      }
-      displayNote(randomized[rIndex], mode);
-    } else {
-      descDiv.classList.remove("step");
-      step = 1;
-    }
+  function speak(text) {
+    if (!speech) return;
+    if (speech.speaking) speech.cancel();
+    text = text || result[index - 1][1];
+    tts.text = text.replace(" - ", ", ");
+    speech.speak(tts);
   }
 </script>
